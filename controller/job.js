@@ -2,6 +2,7 @@ const Job = require("../models/job");
 
 const createJobPost = async (req, res, next) => {
     try {
+        const currentUserId = req.currentUserId;
         const {
             companyName,
             logoUrl,
@@ -15,8 +16,6 @@ const createJobPost = async (req, res, next) => {
             jobType,
             information,
         } = req.body;
-
-        companyName();
 
         if (
             !companyName ||
@@ -48,6 +47,7 @@ const createJobPost = async (req, res, next) => {
             skills,
             jobType,
             information,
+            refUserId: currentUserId,
         });
 
         await jobDetails.save();
@@ -80,7 +80,93 @@ const getJobDetailsById = async (req, res, next) => {
     }
 };
 
+const updateJobDetailsById = async (req, res, next) => {
+    try {
+        const jobId = req.params.jobId;
+        const {
+            companyName,
+            logoUrl,
+            title,
+            description,
+            salary,
+            location,
+            duration,
+            locationType,
+            skills,
+            jobType,
+            information,
+        } = req.body;
+
+        if (
+            !companyName ||
+            !logoUrl ||
+            !title ||
+            !description ||
+            !salary ||
+            !location ||
+            !duration ||
+            !locationType ||
+            !skills ||
+            !jobType ||
+            !information
+        ) {
+            return res.status(400).json({
+                errorMessage: "Bad request",
+            });
+        }
+
+        if (!jobId) {
+            return res.status(400).json({
+                errorMessage: "Bad Request",
+            });
+        }
+
+        const isJobExists = await Job.findOne({ _id: jobId });
+        if (!isJobExists) {
+            return res.status(400).json({
+                errorMessage: "Bad Request",
+            });
+        }
+
+        await Job.updateOne(
+            { _id: jobId },
+            {
+                $set: {
+                    companyName,
+                    logoUrl,
+                    title,
+                    description,
+                    salary,
+                    location,
+                    duration,
+                    locationType,
+                    skills,
+                    jobType,
+                    information,
+                },
+            }
+        );
+        res.json({ message: "Job updated successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getAllJobs = async (req, res, next) => {
+    try {
+        const jobList = await Job.find(
+            {},
+            { companyName: 1, title: 1, description: 1 }
+        );
+        res.json({ data: jobList });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createJobPost,
     getJobDetailsById,
+    updateJobDetailsById,
+    getAllJobs,
 };
