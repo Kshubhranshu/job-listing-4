@@ -154,8 +154,24 @@ const updateJobDetailsById = async (req, res, next) => {
 
 const getAllJobs = async (req, res, next) => {
     try {
+        const searchQuery = req.query.searchQuery || "";
+        const skills = req.query.skills;
+        let filteredSkills;
+        let filter = {};
+        if (skills && skills.length > 0) {
+            filteredSkills = skills.split(",");
+            const caseInsensitiveFilteredSkills = filteredSkills.map(
+                (element) => new RegExp(element, "i")
+            );
+            filteredSkills = caseInsensitiveFilteredSkills;
+            filter = { skills: { $in: filteredSkills } };
+        }
+
         const jobList = await Job.find(
-            {},
+            {
+                title: { $regex: searchQuery, $options: "i" },
+                ...filter,
+            },
             { companyName: 1, title: 1, description: 1 }
         );
         res.json({ data: jobList });
