@@ -59,7 +59,7 @@ const createJobPost = async (req, res, next) => {
 
 const getJobDetailsById = async (req, res, next) => {
     try {
-        const { jobId } = req.params;
+        const { jobId, userId } = req.params;
 
         if (!jobId)
             return res.status(400).json({
@@ -73,8 +73,13 @@ const getJobDetailsById = async (req, res, next) => {
                 errorMessage: "Bad request",
             });
         }
+        let isEditable = false;
 
-        res.json({ jobDetails });
+        if (jobDetails.refUserId.toString() === userId) {
+            isEditable = true;
+        }
+
+        res.json({ jobDetails, isEditable: isEditable });
     } catch (error) {
         next(error);
     }
@@ -122,6 +127,9 @@ const updateJobDetailsById = async (req, res, next) => {
         }
 
         const isJobExists = await Job.findOne({ _id: jobId });
+
+        // check if refUserId is == paramerer id
+
         if (!isJobExists) {
             return res.status(400).json({
                 errorMessage: "Bad Request",

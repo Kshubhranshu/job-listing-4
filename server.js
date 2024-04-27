@@ -3,10 +3,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const authRoute = require("./routes/auth");
 const jobRoute = require("./routes/job");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/health", (req, res) => {
     console.log("I am in health api");
@@ -34,7 +36,7 @@ mongoose
         console.log("Db failed to connect", error);
     });
 
-const PORT = 3000;
+const PORT = 3001;
 
 app.listen(PORT, () => {
     console.log(`Backend server listening at port: ${PORT}`);
