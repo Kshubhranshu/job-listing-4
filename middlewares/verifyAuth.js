@@ -12,9 +12,10 @@ const verifyToken = (req, res, next) => {
         req.currentUserId = decode.userId;
         next();
     } catch (error) {
-        return res
-            .status(401)
-            .json({ message: "Unauthorized access! Invalid token" });
+        return res.status(401).json({
+            message: "Unauthorized access! Invalid token",
+            isTokenInValid: true,
+        });
     }
 };
 
