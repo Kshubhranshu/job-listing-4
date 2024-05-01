@@ -163,6 +163,7 @@ const updateJobDetailsById = async (req, res, next) => {
 const getAllJobs = async (req, res, next) => {
     try {
         const searchQuery = req.query.searchQuery || "";
+        const activeUserId = req.params.userId || "";
         const skills = req.query.skills;
         let filteredSkills;
         let filter = {};
@@ -175,13 +176,17 @@ const getAllJobs = async (req, res, next) => {
             filter = { skills: { $in: filteredSkills } };
         }
 
-        const jobList = await Job.find(
-            {
-                title: { $regex: searchQuery, $options: "i" },
-                ...filter,
-            },
-            { companyName: 1, title: 1, description: 1 }
-        );
+        const jobList = await Job.find({
+            title: { $regex: searchQuery, $options: "i" },
+            ...filter,
+        });
+
+        // const updatedJobList = jobList.map((data) => {
+        //     if (data.refUserId.toString() === activeUserId)
+        //         return { ...data, isEditable: true };
+        //     return { ...data };
+        // });
+
         res.json({ data: jobList });
     } catch (error) {
         next(error);
